@@ -10,9 +10,9 @@ datasource db {
 }
 
 model User {
-  id       Int      @id @default(autoincrement())
+  id       Int     @id @default(autoincrement())
   name     String
-  email    String   @unique
+  email    String  @unique
   password String
   movies   Movie[]
 
@@ -24,7 +24,7 @@ model Movie {
   id          Int      @id @default(autoincrement())
   title       String
   description String?
-  posterUrl   String?   // ← optional URL for your image
+  posterUrl   String? // ← optional URL for your image
   watched     Boolean  @default(false)
   rating      Int?
   genreId     Int
@@ -34,6 +34,30 @@ model Movie {
 
   genre Genre @relation(fields: [genreId], references: [id])
   user  User  @relation(fields: [userId], references: [id])
+}
+
+model RatingEntry {
+  id Int @id @default(autoincrement())
+}
+
+model CastType {
+  id Int @id @default(autoincrement())
+}
+
+model Cast {
+  id Int @id @default(autoincrement())
+}
+
+model Studio {
+  id Int @id @default(autoincrement())
+}
+
+model Publisher {
+  id Int @id @default(autoincrement())
+}
+
+model Platform {
+  id Int @id @default(autoincrement())
 }
 
 model Genre {
