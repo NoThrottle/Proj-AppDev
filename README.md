@@ -1,3 +1,8 @@
+## IMPORTANT NOTES
+Do not commit .env files, even if this is a private repository.
+
+----------------
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
