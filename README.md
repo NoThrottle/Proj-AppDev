@@ -1,5 +1,6 @@
 ## IMPORTANT NOTES
-Do not commit .env files, even if this is a private repository.
+- Do not commit .env files, even if this is a private repository.
+- For LARGE updates, do a pull request instead of directly committing so we can review the changes much more easily
 
 ----------------
 
