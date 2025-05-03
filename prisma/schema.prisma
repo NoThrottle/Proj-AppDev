@@ -9,6 +9,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// User model represents a person who can log in, rate, and manage movies.
+/// - deletedAt: Used for soft deletion (user is not removed from database).
+/// - Watchlists: Collections of movies the user wants to organize.
+/// - WatchlistEntry: Individual entries in watchlists.
 model User {
   id       Int     @id @default(autoincrement())
   name     String
@@ -16,15 +20,27 @@ model User {
   password String
   movies   Movie[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  deletedAt      DateTime?
+  RatingEntry    RatingEntry[]
+  Watchlists     Watchlist[]
+  WatchlistEntry WatchlistEntry[]
 }
 
+/// Movie model represents a film entry in the app.
+/// - genre: The genre/category of the movie.
+/// - user: The user who added the movie.
+/// - ratingEntries: All ratings and reviews for this movie.
+/// - studios, publishers, platforms, casts: Many-to-many relationships.
+/// - movieCasts: Cast members and their roles in this movie.
+/// - moviePlatforms: Platforms where the movie is available, with release info.
+/// - WatchlistEntry: Watchlist entries for this movie.
 model Movie {
   id          Int      @id @default(autoincrement())
   title       String
   description String?
-  posterUrl   String? // ← optional URL for your image
+  posterUrl   String?
   watched     Boolean  @default(false)
   rating      Int?
   genreId     Int
@@ -32,36 +48,169 @@ model Movie {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  genre Genre @relation(fields: [genreId], references: [id])
-  user  User  @relation(fields: [userId], references: [id])
+  genre          Genre            @relation(fields: [genreId], references: [id])
+  user           User             @relation(fields: [userId], references: [id])
+  ratingEntries  RatingEntry[]
+  studios        Studio[]         @relation("MovieStudios")
+  publishers     Publisher[]      @relation("MoviePublishers")
+  platforms      Platform[]       @relation("MoviePlatforms")
+  casts          Cast[]           @relation("MovieCasts")
+  movieCasts     MovieCast[]
+  moviePlatforms MoviePlatform[]
+  WatchlistEntry WatchlistEntry[]
 }
 
+/// RatingEntry model stores a user's rating and review for a movie.
+/// - user: The user who gave the rating.
+/// - movie: The movie being rated.
+/// - createdAt: When the rating was made.
+/// - rating: The score given by the user.
+/// - subject/comment: Review details.
 model RatingEntry {
-  id Int @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
+  movieId   Int
+  movie     Movie    @relation(fields: [movieId], references: [id])
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  rating    Int
+  subject   String
+  comment   String
 }
 
-model CastType {
-  id Int @id @default(autoincrement())
-}
-
+/// Cast model represents an actor or actress.
+/// - name: Name of the cast member.
+/// - birthday: Birthday of the cast member.
+/// - age: Age of the cast member.
+/// - movies: Movies this cast member is part of.
+/// - movieCasts: Roles played in each movie.
 model Cast {
-  id Int @id @default(autoincrement())
+  id         Int         @id @default(autoincrement())
+  name       String
+  birthday   DateTime
+  age        Int
+  movies     Movie[]     @relation("MovieCasts")
+  movieCasts MovieCast[]
 }
 
+/// MovieCast model connects a cast member to a movie and stores their role.
+/// - role: The character or part played by the cast member in the movie.
+model MovieCast {
+  id      Int    @id @default(autoincrement())
+  movieId Int
+  castId  Int
+  role    String
+  movie   Movie  @relation(fields: [movieId], references: [id])
+  cast    Cast   @relation(fields: [castId], references: [id])
+}
+
+/// Studio model represents a movie studio.
+/// - name: Name of the studio.
+/// - pictureUrl: Logo or image of the studio.
+/// - movies: Movies produced by this studio.
 model Studio {
-  id Int @id @default(autoincrement())
+  id         Int     @id @default(autoincrement())
+  name       String
+  pictureUrl String
+  movies     Movie[] @relation("MovieStudios")
 }
 
+/// Publisher model represents a movie publisher.
+/// - name: Name of the publisher.
+/// - pictureUrl: Logo or image of the publisher.
+/// - movies: Movies published by this publisher.
 model Publisher {
-  id Int @id @default(autoincrement())
+  id         Int     @id @default(autoincrement())
+  name       String
+  pictureUrl String
+  movies     Movie[] @relation("MoviePublishers")
 }
 
+/// Platform model represents a streaming or viewing platform (like Netflix).
+/// - name: Name of the platform.
+/// - image: Logo or image of the platform.
+/// - movies: Movies available on this platform.
+/// - moviePlatforms: Details about movie availability on this platform.
+/// - WatchlistEntry: Watchlist entries where this platform was used.
 model Platform {
-  id Int @id @default(autoincrement())
+  id             Int              @id @default(autoincrement())
+  name           String
+  image          String
+  movies         Movie[]          @relation("MoviePlatforms")
+  moviePlatforms MoviePlatform[]
+  WatchlistEntry WatchlistEntry[]
 }
 
+/// Genre model represents a movie genre/category.
+/// - name: Name of the genre (e.g., Action, Drama).
+/// - movies: Movies under this genre.
 model Genre {
   id     Int     @id @default(autoincrement())
   name   String
   movies Movie[]
+}
+
+/// MoviePlatform model connects a movie to a platform and stores release and availability info.
+/// - releaseDate: When the movie became available on the platform.
+/// - platformUrl: Link to the movie on the platform (if available).
+/// - moviePlatformCountries: Country-specific availability info.
+model MoviePlatform {
+  id                     Int                    @id @default(autoincrement())
+  movieId                Int
+  platformId             Int
+  releaseDate            DateTime
+  platformUrl            String? //link to netflix etc.
+  movie                  Movie                  @relation(fields: [movieId], references: [id])
+  platform               Platform               @relation(fields: [platformId], references: [id])
+  moviePlatformCountries MoviePlatformCountry[]
+}
+
+/// MoviePlatformCountry model stores country-specific availability for a movie on a platform.
+/// - country: Country code or name.
+/// - availability: True if available, false if not.
+model MoviePlatformCountry {
+  id              Int           @id @default(autoincrement())
+  moviePlatformId Int
+  country         String
+  availability    Boolean // true = available, false = unavailable
+  moviePlatform   MoviePlatform @relation(fields: [moviePlatformId], references: [id])
+}
+
+/// Watchlist model represents a collection of movies a user wants to organize.
+/// - name: Name of the watchlist (e.g., "Favorites", "To Watch").
+/// - image: Optional image for the watchlist.
+/// - description: Short description of the watchlist.
+/// - user: The owner of the watchlist.
+/// - entries: The movies in this watchlist.
+model Watchlist {
+  id          Int              @id @default(autoincrement())
+  userId      Int
+  name        String
+  image       String?
+  description String?
+  user        User             @relation(fields: [userId], references: [id])
+  entries     WatchlistEntry[]
+}
+
+/// WatchlistEntry model connects a movie to a watchlist and tracks user-specific info.
+/// - user: The user who added the entry (for easy querying of all watched movies).
+/// - watchlist: The watchlist this entry belongs to.
+/// - movie: The movie being added.
+/// - rank: Position in the watchlist.
+/// - dateAdded: When the movie was added.
+/// - dateWatched: When the user watched the movie (if already watched).
+/// - platform: Platform used to watch the movie (if any).
+model WatchlistEntry {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  watchlistId Int
+  movieId     Int
+  rank        Int
+  dateAdded   DateTime  @default(now())
+  dateWatched DateTime?
+  platformId  Int?
+  user        User      @relation(fields: [userId], references: [id])
+  watchlist   Watchlist @relation(fields: [watchlistId], references: [id])
+  movie       Movie     @relation(fields: [movieId], references: [id])
+  platform    Platform? @relation(fields: [platformId], references: [id])
 }
