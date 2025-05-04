@@ -25,12 +25,10 @@ model User {
   RatingEntry    RatingEntry[]
   Watchlists     Watchlist[]
   WatchlistEntry WatchlistEntry[]
-  Movie          Movie[]
 }
 
 /// Movie model represents a film entry in the app.
 /// - genre: The genre/category of the movie.
-/// - user: The user who added the movie.
 /// - ratingEntries: All ratings and reviews for this movie.
 /// - studios, publishers, platforms, casts: Many-to-many relationships.
 /// - movieCasts: Cast members and their roles in this movie.
@@ -43,7 +41,6 @@ model Movie {
   posterUrl   String?
   watched     Boolean  @default(false)
   rating      Int?
-  userId      Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -56,7 +53,6 @@ model Movie {
   movieCasts     MovieCast[]
   moviePlatforms MoviePlatform[]
   WatchlistEntry WatchlistEntry[]
-  user           User             @relation(fields: [userId], references: [id])
 }
 
 /// RatingEntry model stores a user's rating and review for a movie.

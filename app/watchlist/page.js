@@ -15,17 +15,26 @@ export default async function WatchlistsPage() {
   });
 
   // Server action to create a new watchlist
-  async function createWatchlist(name) {
+  async function createWatchlist(formData) {
     "use server";
+    const name = formData.get("name");
+    const image = formData.get("image");
+    const description = formData.get("description");
+    const tintColor = formData.get("tintColor");
     if (!name) return;
     try {
       await prisma.watchlist.create({
-        data: { userId: session.user.id, name },
+        data: {
+          userId: session.user.id,
+          name,
+          image: image || undefined,
+          description: description || undefined,
+          tintColor: tintColor || undefined,
+        },
       });
       redirect("/watchlist");
     } catch (error) {
       console.error("Database error (createWatchlist):", error);
-      // Optionally show a toast or set a UI error state here
       return;
     }
   }
@@ -48,7 +57,7 @@ export default async function WatchlistsPage() {
       <h1 className="text-2xl font-bold mb-4">My Watchlists</h1>
       <WatchlistsClient
         watchlists={watchlists}
-        onCreate={createWatchlist}
+        createWatchlist={createWatchlist}
         onDelete={deleteWatchlist}
       />
     </div>

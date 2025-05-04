@@ -1,15 +1,21 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button, TextInput } from "flowbite-react";
 import WatchlistCard from "../../components/ui/WatchlistCard";
 import { Checkbox } from "../../components/ui/checkbox";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "../../components/ui/dialog";
+import { Input } from "../../components/ui/input";
+import ColorPickerWithInput from "../../components/ui/ColorPickerWithInput";
+import { useRouter } from "next/navigation";
 
-export default function WatchlistsClient({ watchlists, onCreate, onDelete }) {
+export default function WatchlistsClient({ watchlists, createWatchlist, onDelete }) {
   const [view, setView] = useState("cards");
   const [search, setSearch] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [selected, setSelected] = useState([]);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const router = useRouter();
 
   const filtered = watchlists.filter(wl => wl.name.toLowerCase().includes(search.toLowerCase()));
 
@@ -31,6 +37,49 @@ export default function WatchlistsClient({ watchlists, onCreate, onDelete }) {
           {editMode && selected.length > 0 && (
             <Button size="xs" color="red" onClick={handleDeleteSelected}>Delete Selected</Button>
           )}
+          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+            <DialogTrigger asChild>
+              <Button size="xs" color="green" onClick={() => setShowAddDialog(true)}>Add</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Watchlist</DialogTitle>
+              </DialogHeader>
+              <form
+                action={async (formData) => {
+                  await createWatchlist(formData);
+                  setShowAddDialog(false);
+                  router.refresh();
+                }}
+                className="space-y-2"
+              >
+                <Input
+                  name="name"
+                  autoFocus
+                  placeholder="Name (required)"
+                  required
+                  className="mb-2"
+                />
+                <Input
+                  name="image"
+                  placeholder="Image URL (optional)"
+                  className="mb-2"
+                />
+                <Input
+                  name="description"
+                  placeholder="Description (optional)"
+                  className="mb-2"
+                />
+                <ColorPickerWithInput name="tintColor" />
+                <DialogFooter>
+                  <Button type="submit" color="green">Add</Button>
+                  <DialogClose asChild>
+                    <Button type="button" variant="outline">Cancel</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
         <TextInput
           placeholder="Search watchlists..."
@@ -57,6 +106,18 @@ export default function WatchlistsClient({ watchlists, onCreate, onDelete }) {
                 title={wl.name}
                 href={editMode ? undefined : `/watchlist/${wl.id}`}
                 imageAlt={wl.name}
+                clickable={!editMode || true}
+                onClick={() => {
+                  if (editMode) {
+                    toggleSelect(wl.id);
+                  } else {
+                    window.location.href = `/watchlist/${wl.id}`;
+                  }
+                }}
+                style={selected.includes(wl.id) && editMode && wl.tintColor ? {
+                  boxShadow: `0 0 0 4px ${wl.tintColor}, 0 2px 8px 0 rgba(0,0,0,0.10)`,
+                  borderColor: wl.tintColor
+                } : {}}
               >
                 {/* No delete button in card, use top delete */}
               </WatchlistCard>
@@ -85,10 +146,6 @@ export default function WatchlistsClient({ watchlists, onCreate, onDelete }) {
           ))}
         </div>
       )}
-      <form onSubmit={e => { e.preventDefault(); const fd = new FormData(e.target); onCreate(fd.get("name")); e.target.reset(); }} className="flex gap-2 mt-6">
-        <TextInput name="name" placeholder="New watchlist name..." required />
-        <Button type="submit">Create</Button>
-      </form>
     </div>
   );
 }
