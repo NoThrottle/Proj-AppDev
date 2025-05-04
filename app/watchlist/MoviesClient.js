@@ -31,7 +31,7 @@ export default function MoviesClient({ movies }) {
     <div className="flex flex-col gap-6 p-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">My Movie Watchlist</h1>
-        <Button as={Link} href="/movies/create" gradientDuoTone="purpleToBlue">
+        <Button as={Link} href="/watchlist/search" gradientDuoTone="purpleToBlue">
           Add Movie
         </Button>
       </div>

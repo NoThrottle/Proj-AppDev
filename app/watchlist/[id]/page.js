@@ -33,13 +33,13 @@ export default async function ViewMoviePage({ params }) {
         <p><strong>Rating:</strong> {movie.rating ?? "—"}</p>
 
       <div className="flex gap-2 mt-4">
-        <Button as={Link} href={`/movies/${movie.id}/edit`} color="blue">
+        <Button as={Link} href={`/watchlist/${movie.id}/edit`} color="blue">
           Edit
         </Button>
-        <Button as={Link} href={`/movies/${movie.id}/delete`} color="red">
+        <Button as={Link} href={`/watchlist/${movie.id}/delete`} color="red">
           Delete
         </Button>
-        <Button as={Link} href="/movies" color="gray">
+        <Button as={Link} href="/watchlist" color="gray">
           Done
         </Button>
       </div>
