@@ -14,11 +14,10 @@ datasource db {
 /// - Watchlists: Collections of movies the user wants to organize.
 /// - WatchlistEntry: Individual entries in watchlists.
 model User {
-  id       Int     @id @default(autoincrement())
+  id       Int    @id @default(autoincrement())
   name     String
-  email    String  @unique
+  email    String @unique
   password String
-  movies   Movie[]
 
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
@@ -26,6 +25,7 @@ model User {
   RatingEntry    RatingEntry[]
   Watchlists     Watchlist[]
   WatchlistEntry WatchlistEntry[]
+  Movie          Movie[]
 }
 
 /// Movie model represents a film entry in the app.
@@ -43,13 +43,11 @@ model Movie {
   posterUrl   String?
   watched     Boolean  @default(false)
   rating      Int?
-  genreId     Int
   userId      Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  genre          Genre            @relation(fields: [genreId], references: [id])
-  user           User             @relation(fields: [userId], references: [id])
+  genres         Genre[]          @relation("MovieGenres")
   ratingEntries  RatingEntry[]
   studios        Studio[]         @relation("MovieStudios")
   publishers     Publisher[]      @relation("MoviePublishers")
@@ -58,6 +56,7 @@ model Movie {
   movieCasts     MovieCast[]
   moviePlatforms MoviePlatform[]
   WatchlistEntry WatchlistEntry[]
+  user           User             @relation(fields: [userId], references: [id])
 }
 
 /// RatingEntry model stores a user's rating and review for a movie.
@@ -147,7 +146,7 @@ model Platform {
 model Genre {
   id     Int     @id @default(autoincrement())
   name   String
-  movies Movie[]
+  movies Movie[] @relation("MovieGenres")
 }
 
 /// MoviePlatform model connects a movie to a platform and stores release and availability info.
