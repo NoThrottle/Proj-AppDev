@@ -31,8 +31,10 @@ export default async function WatchlistDetailPage({ params }) {
     <div className="max-w-3xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-4">{watchlist.name}</h1>
       <WatchlistEntriesClient entries={watchlist.entries} />
-      <div className="mt-6">
-        <Button as={Link} href="/watchlist" color="gray">Back to Watchlists</Button>
+      <div className="mt-6 flex justify-center">
+        <Button as={Link} href="/watchlist" color="gray" className="w-full max-w-xs sm:max-w-sm lg:max-w-md">
+          Back to Watchlists
+        </Button>
       </div>
     </div>
   );
