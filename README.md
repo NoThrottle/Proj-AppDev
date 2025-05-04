@@ -1,9 +1,3 @@
-## IMPORTANT NOTES
-- Do not commit .env files, even if this is a private repository.
-- For LARGE updates, do a pull request instead of directly committing so we can review the changes much more easily
-
-----------------
-
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
@@ -11,6 +5,10 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 First, run the development server:
 
 ```bash
+
+npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
+npm install react-icons
+npm install next-auth @next-auth/prisma-adapter prisma @prisma/client
 npm run dev
 # or
 yarn dev

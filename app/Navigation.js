@@ -29,22 +29,32 @@ export function Navigation() {
         <Navbar.Link as={Link} href="/" active={path === "/"}>
           Home
         </Navbar.Link>
+        <Navbar.Link as={Link} href="/top10list" active={path === "/top10list"}>
+          Top 10 List
+        </Navbar.Link>
         <Navbar.Link as={Link} href="/movies" active={path.startsWith("/movies")}> 
           Movies
         </Navbar.Link>
-        {!session ? (
-          <Navbar.Link as={Link} href="/login" active={path === "/login"}>
-            Login
-          </Navbar.Link>
-        ) : (
-          <button
-            onClick={() => signOut({ callbackUrl: "/" })}
-            className="text-red-500 font-medium px-2 hover:underline"
-          >
-            Logout ({session.user.name || session.user.email})
-          </button>
-        )}
+
+            {!session ? (
+      <>
+        <Navbar.Link as={Link} href="/login" active={path === "/login"}>
+          Login
+        </Navbar.Link>
+        <Navbar.Link as={Link} href="/signup" active={path.startsWith("/signup")}>
+          Signup
+        </Navbar.Link>
+      </>
+    ) : (
+      <button
+        onClick={() => signOut({ callbackUrl: "/" })}
+        className="text-red-500 font-medium px-2 hover:underline"
+      >
+        Logout ({session.user.name || session.user.email})
+      </button>
+    )}  
       </Navbar.Collapse>
+
     </Navbar>
   );
 }

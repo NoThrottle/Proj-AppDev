@@ -1,43 +1,38 @@
-// app/movies/[id]/delete/page.jsx
+// app/movies/[id]/delete/page.js
 import prisma from "@/lib/prisma";
-import { Button } from "flowbite-react";
-import Form from "next/form";
-import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound, redirect, forbidden } from "next/navigation";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getServerSession } from "next-auth";
 
 export default async function DeleteMoviePage({ params }) {
-  const id = parseInt(params.id, 10);
+  const session = await getServerSession(authOptions);
+  if (!session) redirect("/login");
 
-  const movie = await prisma.movie.findUnique({
-    where: { id },
-  });
+  const movieId = parseInt(params.id, 10);
+  const movie = await prisma.movie.findUnique({ where: { id: movieId } });
 
   if (!movie) return notFound();
+  if (movie.userId !== session.user.id) return forbidden();
 
   const deleteMovie = async () => {
     "use server";
-
-    await prisma.movie.delete({
-      where: { id },
-    });
-
+    await prisma.movie.delete({ where: { id: movieId } });
     redirect("/movies");
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-md mx-auto mt-10 bg-white p-6 rounded-lg shadow-md">
-      <h1 className="text-xl font-semibold text-gray-800">
-        Are you sure you want to delete <b>{movie.title}</b>?
-      </h1>
-
-      <Form action={deleteMovie} className="flex gap-4">
-        <Button type="submit" color="failure">
+    <form action={deleteMovie} className="max-w-md mx-auto mt-10 space-y-4">
+      <h2 className="text-xl font-bold">Are you sure you want to delete this movie?</h2>
+      <p className="text-gray-600">{movie.title}</p>
+      <div className="flex space-x-4">
+        <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded">
           Yes, Delete
-        </Button>
-        <Button as={Link} href={`/movies/${id}`} color="light">
-          No, Go Back
-        </Button>
-      </Form>
-    </div>
+        </button>
+        <a href="/movies" className="bg-green-300 text-black px-4 py-2 rounded">
+          Cancel
+        </a>
+      </div>
+    </form>
+
   );
 }
