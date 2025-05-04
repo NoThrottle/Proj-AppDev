@@ -187,6 +187,7 @@ model Watchlist {
   name        String
   image       String?
   description String?
+  tintColor   String? // HEX color code or CSS color string for UI tint
   user        User             @relation(fields: [userId], references: [id])
   entries     WatchlistEntry[]
 }
