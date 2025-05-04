@@ -47,29 +47,26 @@ export default function WatchlistEntriesClient({ entries }) {
       {filtered.length === 0 ? (
         <div className="text-gray-500">No movies found.</div>
       ) : view === "cards" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {filtered.map(entry => (
-            <div key={entry.id} className="relative">
-              {editMode && (
-                <Checkbox
-                  checked={selected.includes(entry.id)}
-                  onCheckedChange={() => toggleSelect(entry.id)}
-                  className="absolute top-2 left-2 z-10 w-5 h-5 bg-white"
-                />
-              )}
+        <div className="p-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {filtered.map(entry => (
               <WatchlistCard
+                key={entry.id}
                 image={entry.movie.posterUrl}
                 tintColor={entry.movie.tintColor}
                 title={entry.movie.title}
                 imageAlt={entry.movie.title}
                 placeholderIcon="🎬"
               >
-                <p className="text-sm text-gray-500">{entry.movie.genre?.name}</p>
+                <p className="text-sm text-gray-500">
+                  {entry.movie.genres && entry.movie.genres.length > 0
+                    ? entry.movie.genres.map(g => g.name).join(", ")
+                    : null}
+                </p>
                 <p className="text-xs text-gray-400">Added: {new Date(entry.dateAdded).toLocaleDateString()}</p>
-                {/* No delete button in card, use top delete */}
               </WatchlistCard>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       ) : (
         <div>

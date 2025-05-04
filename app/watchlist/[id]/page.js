@@ -17,7 +17,7 @@ export default async function WatchlistDetailPage({ params }) {
     include: {
       entries: {
         include: {
-          movie: { include: { genre: true } }
+          movie: { include: { genres: true } }
         },
         orderBy: { rank: "asc" }
       }

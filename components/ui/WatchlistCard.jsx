@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
+import { normalizeTintColor } from "../../lib/utils";
 
 export default function WatchlistCard({
   image,
@@ -27,13 +28,13 @@ export default function WatchlistCard({
         `flex flex-col transition rounded-lg shadow-sm p-0 border border-gray-500 overflow-hidden w-full max-w-xs min-w-[16rem]` +
         (clickable ? ' cursor-pointer hover:scale-[1.025] hover:shadow-lg active:scale-[0.99] duration-150' : '')
       }
-      style={{ backgroundColor: tintColor ? tintColor : undefined, minHeight: 340, maxHeight: 340 }}
+      style={{ backgroundColor: tintColor ? normalizeTintColor(tintColor) : undefined, minHeight: 340, maxHeight: 340 }}
       onClick={clickable && onClick ? onClick : undefined}
       tabIndex={clickable ? 0 : -1}
       role={clickable ? 'button' : undefined}
       onKeyDown={clickable && onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick(e); } : undefined}
     >
-      <div className="relative w-full aspect-[16/9]" style={{ backgroundColor: tintColor ? tintColor : '#e5e7eb' }}>
+      <div className="relative w-full aspect-[16/9]" style={{ backgroundColor: tintColor ? normalizeTintColor(tintColor) : '#e5e7eb' }}>
         {image ? (
           <img
             src={image}
