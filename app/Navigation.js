@@ -16,7 +16,7 @@ export function Navigation() {
   }
 
   return (
-    <Navbar fluid rounded className="bg-white shadow-md">
+    <Navbar fluid rounded className="bg-background shadow-md sticky top-0 z-50">
       <Navbar.Brand as={Link} href="/">
         <Image
           src="/favicon.ico"
@@ -37,9 +37,12 @@ export function Navigation() {
         <Navbar.Link as={Link} href="/top10list" active={path === "/top10list"}>
           Top 10 List
         </Navbar.Link>
-        <Navbar.Link as={Link} href="/movies" active={path.startsWith("/movies")}> 
-          Movies
+        <Navbar.Link as={Link} href="/watchlist" active={path === "/watchlist"}>
+          Watchlist
         </Navbar.Link>
+        {/* <Navbar.Link as={Link} href="/movies" active={path.startsWith("/movies")}> 
+          Movies
+        </Navbar.Link> */}
 
             {!session ? (
       <>

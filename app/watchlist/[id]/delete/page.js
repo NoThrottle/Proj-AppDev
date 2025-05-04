@@ -17,7 +17,7 @@ export default async function DeleteMoviePage({ params }) {
   const deleteMovie = async () => {
     "use server";
     await prisma.movie.delete({ where: { id: movieId } });
-    redirect("/movies");
+    redirect("/watchlist");
   };
 
   return (
@@ -28,7 +28,7 @@ export default async function DeleteMoviePage({ params }) {
         <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded">
           Yes, Delete
         </button>
-        <a href="/movies" className="bg-green-300 text-black px-4 py-2 rounded">
+        <a href="/watchlist" className="bg-green-300 text-black px-4 py-2 rounded">
           Cancel
         </a>
       </div>

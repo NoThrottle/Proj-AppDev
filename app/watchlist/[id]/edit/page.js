@@ -39,7 +39,7 @@ export default async function EditMoviePage({ params }) {
       },
     });
 
-    redirect(`/movies/${movieId}`);
+    redirect(`/watchlist/${movieId}`);
   };
 
   return (

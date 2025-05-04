@@ -1,3 +1,24 @@
+/* Thanos Snap Animation */
+.thanos-snap {
+  animation: thanosSnap 0.8s cubic-bezier(.4,0,.2,1) forwards;
+  filter: blur(2px) grayscale(0.7) opacity(0.7);
+  opacity: 0;
+}
+@keyframes thanosSnap {
+  0% {
+    opacity: 1;
+    filter: none;
+  }
+  60% {
+    opacity: 1;
+    filter: none;
+  }
+  100% {
+    opacity: 0;
+    filter: blur(2px) grayscale(0.7) opacity(0.7);
+  }
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
