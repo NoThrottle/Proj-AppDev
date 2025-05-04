@@ -44,11 +44,11 @@ export default async function WatchlistsPage() {
     "use server";
     try {
       await prisma.watchlist.delete({ where: { id } });
-      redirect("/watchlist");
+      // No redirect, just return true to signal success
+      return true;
     } catch (error) {
       console.error("Database error (deleteWatchlist):", error);
-      // Optionally show a toast or set a UI error state here
-      return;
+      return false;
     }
   }
 
@@ -59,6 +59,7 @@ export default async function WatchlistsPage() {
         watchlists={watchlists}
         createWatchlist={createWatchlist}
         onDelete={deleteWatchlist}
+        refreshOnDelete={true}
       />
     </div>
   );

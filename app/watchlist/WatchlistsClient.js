@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Button, TextInput } from "flowbite-react";
 import WatchlistCard from "../../components/ui/WatchlistCard";
@@ -15,6 +15,8 @@ export default function WatchlistsClient({ watchlists, createWatchlist, onDelete
   const [editMode, setEditMode] = useState(false);
   const [selected, setSelected] = useState([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [deleting, setDeleting] = useState([]);
+  const gridRef = useRef();
   const router = useRouter();
 
   const filtered = watchlists.filter(wl => wl.name.toLowerCase().includes(search.toLowerCase()));
@@ -22,9 +24,18 @@ export default function WatchlistsClient({ watchlists, createWatchlist, onDelete
   const toggleSelect = (id) => {
     setSelected((prev) => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
-  const handleDeleteSelected = () => {
-    selected.forEach(id => onDelete(id));
+  const handleDeleteSelected = async () => {
+    for (const id of selected) {
+      setDeleting((prev) => [...prev, id]);
+      await new Promise((resolve) => setTimeout(resolve, 800)); // Wait for animation
+      await onDelete(id);
+    }
     setSelected([]);
+    // Wait a bit longer to ensure animation is visible before refresh
+    setTimeout(() => {
+      setDeleting([]);
+      router.refresh();
+    }, 200);
   };
 
   return (
@@ -89,10 +100,10 @@ export default function WatchlistsClient({ watchlists, createWatchlist, onDelete
         />
       </div>
       {view === "cards" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" ref={gridRef}>
           {filtered.length === 0 && <div className="text-gray-500">No watchlists found.</div>}
           {filtered.map((wl) => (
-            <div key={wl.id} className="relative">
+            <div key={wl.id} className={`relative transition-all duration-700 ${deleting.includes(wl.id) ? 'thanos-snap' : ''}`} style={{ pointerEvents: deleting.includes(wl.id) ? 'none' : undefined }}>
               {editMode && (
                 <Checkbox
                   checked={selected.includes(wl.id)}
@@ -129,7 +140,14 @@ export default function WatchlistsClient({ watchlists, createWatchlist, onDelete
           {filtered.map((wl) => (
             <div
               key={wl.id}
-              className="flex items-center justify-between p-4 bg-white/10 dark:bg-gray-800/80 hover:bg-white/20 dark:hover:bg-gray-700/80 transition rounded-lg shadow ring-1 ring-black/10 dark:ring-white/10 mb-2 backdrop-blur min-h-[64px] relative"
+              className="flex items-center justify-between p-4 bg-white/10 dark:bg-gray-800/80 hover:bg-white/20 dark:hover:bg-gray-700/80 transition rounded-lg shadow ring-1 ring-black/10 dark:ring-white/10 mb-2 backdrop-blur min-h-[64px] relative cursor-pointer"
+              onClick={() => {
+                if (!editMode) window.location.href = `/watchlist/${wl.id}`;
+              }}
+              tabIndex={0}
+              onKeyDown={e => {
+                if (!editMode && (e.key === 'Enter' || e.key === ' ')) window.location.href = `/watchlist/${wl.id}`;
+              }}
             >
               {editMode && (
                 <Checkbox
@@ -138,10 +156,16 @@ export default function WatchlistsClient({ watchlists, createWatchlist, onDelete
                   className="mr-3 w-5 h-5 bg-white"
                 />
               )}
-              <div className="flex-1 min-w-0 flex items-center" style={{ minHeight: '2.5em' }}>
+              <div className="flex items-center gap-4 flex-1 min-w-0 h-12">
+                {wl.image ? (
+                  <img src={wl.image} alt={wl.name} className="w-12 h-12 object-cover rounded-md flex-shrink-0" />
+                ) : (
+                  <div className="w-12 h-12 bg-gray-200 flex items-center justify-center text-gray-400 rounded-md flex-shrink-0">
+                    <span className="text-2xl">🖼️</span>
+                  </div>
+                )}
                 <div className="font-medium truncate leading-tight w-full" style={{lineHeight: '1.25em', maxHeight: '2.5em', overflow: 'hidden'}} title={wl.name}>{wl.name}</div>
               </div>
-              {/* Removed per-item Delete button for cleaner UI */}
             </div>
           ))}
         </div>
