@@ -10,6 +10,11 @@ export function Navigation() {
   const path = usePathname();
   const { data: session } = useSession();
 
+  // Hide navigation on login page
+  if (path === "/login") {
+    return null;
+  }
+
   return (
     <Navbar fluid rounded className="bg-white shadow-md">
       <Navbar.Brand as={Link} href="/">
@@ -21,7 +26,7 @@ export function Navigation() {
           alt="Logo"
         />
         <span className="self-center whitespace-nowrap text-xl font-semibold">
-          Movie Watchlist
+          Watchlist
         </span>
       </Navbar.Brand>
       <Navbar.Toggle />
