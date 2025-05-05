@@ -107,18 +107,14 @@ export function Navigation() {
               Movies
             </Navbar.Link> */}
             {!session ? (
-              <>
-                <Navbar.Link as={Link} href="/login" active={path === "/login"}>
-                  Login
-                </Navbar.Link>
-                <Navbar.Link as={Link} href="/signup" active={path.startsWith("/signup")}> 
-                  Signup
-                </Navbar.Link>
-              </>
+              <Navbar.Link as={Link} href="/login" active={path === "/login"}>
+                Login
+              </Navbar.Link>
             ) : (
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}
-                className="text-red-500 font-medium px-2 hover:underline"
+                className="text-red-500 font-medium px-2 hover:underline transition-all duration-200"
+                style={{ minWidth: 80, padding: '0 16px', fontSize: '1rem', borderRadius: 6, height: '40px', whiteSpace: 'nowrap' }}
               >
                 Logout ({session.user.name || session.user.email})
               </button>

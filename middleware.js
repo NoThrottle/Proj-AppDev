@@ -18,9 +18,6 @@ export async function middleware(req) {
 
 export const config = {
   matcher: [
-    "/movies/:path*",
-    "/watchlist/:path*",
-    "/leaderboards",
-    "/admin/:path*"
+    "/((?!api|_next|public|favicon.ico|login|signup|globals.css|file.svg|globe.svg|next.svg|vercel.svg|window.svg|$|leaderboards).*)",
   ],
 };
