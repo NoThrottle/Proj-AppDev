@@ -14,11 +14,16 @@ datasource db {
 /// - Watchlists: Collections of movies the user wants to organize.
 /// - WatchlistEntry: Individual entries in watchlists.
 model User {
-  id       Int     @id @default(autoincrement())
-  name     String
-  email    String  @unique
-  password String
-  admin    Boolean @default(false)
+  id            Int       @id @default(autoincrement())
+  name          String
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  accounts      Account[]
+  sessions      Session[]
+
+  admin Boolean @default(false)
 
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
@@ -26,6 +31,32 @@ model User {
   RatingEntry    RatingEntry[]
   Watchlists     Watchlist[]
   WatchlistEntry WatchlistEntry[]
+}
+
+model Account {
+  id                Int     @id @default(autoincrement())
+  userId            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           Int      @id @default(autoincrement())
+  sessionToken String   @unique
+  userId       Int
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 /// Movie model represents a film entry in the app.
