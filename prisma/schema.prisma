@@ -14,10 +14,11 @@ datasource db {
 /// - Watchlists: Collections of movies the user wants to organize.
 /// - WatchlistEntry: Individual entries in watchlists.
 model User {
-  id       Int    @id @default(autoincrement())
+  id       Int     @id @default(autoincrement())
   name     String
-  email    String @unique
+  email    String  @unique
   password String
+  admin    Boolean @default(false)
 
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
@@ -37,10 +38,11 @@ model User {
 model Movie {
   id          Int      @id @default(autoincrement())
   title       String
-  description String?
+  description String?  @db.Text
   posterUrl   String?
-  watched     Boolean  @default(false)
+  bannerUrl   String? // Banner image URL
   rating      Int?
+  visibility  String   @default("public") // 'public' or 'private'
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -76,14 +78,13 @@ model RatingEntry {
 /// Cast model represents an actor or actress.
 /// - name: Name of the cast member.
 /// - birthday: Birthday of the cast member.
-/// - age: Age of the cast member.
 /// - movies: Movies this cast member is part of.
 /// - movieCasts: Roles played in each movie.
 model Cast {
   id         Int         @id @default(autoincrement())
   name       String
   birthday   DateTime
-  age        Int
+  profileUrl String? // Profile picture URL
   movies     Movie[]     @relation("MovieCasts")
   movieCasts MovieCast[]
 }

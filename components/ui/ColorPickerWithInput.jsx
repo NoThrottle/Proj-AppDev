@@ -1,3 +1,4 @@
+import { Input } from "./input";
 import { useState } from "react";
 
 export default function ColorPickerWithInput({ name }) {
@@ -17,12 +18,12 @@ export default function ColorPickerWithInput({ name }) {
         />
         <span className="absolute left-0 top-0 w-8 h-8 rounded-lg border border-gray-400 dark:border-gray-700 pointer-events-none" style={{ boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)' }}></span>
       </div>
-      <input
+      <Input
         name={name}
         value={color}
         onChange={e => setColor(e.target.value)}
         placeholder="#hex or CSS color (optional)"
-        className="flex-1 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 rounded px-2 py-1"
+        className="flex-1"
         type="text"
       />
     </div>
