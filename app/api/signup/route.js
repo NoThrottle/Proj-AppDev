@@ -12,7 +12,7 @@ export async function POST(req) {
   const existingUser = await prisma.user.findUnique({ where: { email } });
 
   if (existingUser) {
-    return NextResponse.json({ error: "User already exists" }, { status: 400 });
+    return NextResponse.json({ error: "User already exists. If you registered with Google or another provider, please use that method to log in." }, { status: 400 });
   }
 
   const hashedPassword = await hash(password, 10);
