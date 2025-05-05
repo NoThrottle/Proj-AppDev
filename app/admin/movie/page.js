@@ -10,6 +10,7 @@ import CastTab from "./CastTab";
 import PlatformsTab from "./PlatformsTab";
 import VisibilityTab from "./VisibilityTab";
 import ReviewTab from "./ReviewTab";
+import MoviePreview from "./MoviePreview";
 
 export default function AddMoviePage() {
   const { data: session, status } = useSession();
@@ -232,97 +233,118 @@ export default function AddMoviePage() {
   }
 
   return (
-    <div className="inline-block align-top mt-10 p-6 bg-background rounded shadow" style={{ minWidth: 350 }}>
-      <h1 className="text-2xl font-bold mb-4 text-foreground">Add Movie</h1>
-      <form onSubmit={handleSubmit}>
-        <Tabs value={tab} onValueChange={setTab} className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="basic">Basic Information</TabsTrigger>
-            <TabsTrigger value="publisher">Publisher</TabsTrigger>
-            <TabsTrigger value="studio">Studio</TabsTrigger>
-            <TabsTrigger value="cast">Cast</TabsTrigger>
-            <TabsTrigger value="platforms">Platforms</TabsTrigger>
-            <TabsTrigger value="visibility">Visibility</TabsTrigger>
-            <TabsTrigger value="review">Review</TabsTrigger>
-          </TabsList>
-          <TabsContent value="basic">
-            <BasicTab {...{title, setTitle, description, setDescription, posterUrl, setPosterUrl, bannerUrl, setBannerUrl, genres, genresSelected, setGenresSelected, setTab}} />
-          </TabsContent>
-          <TabsContent value="publisher">
-            <PublisherTab {...{
-              publishers,
-              publishersSelected,
-              setPublishersSelected,
-              publisherDialogOpen,
-              setPublisherDialogOpen,
-              newPublisherName,
-              setNewPublisherName,
-              newPublisherPicture,
-              setNewPublisherPicture,
-              handleCreatePublisher,
-              setTab
-            }} />
-          </TabsContent>
-          <TabsContent value="studio">
-            <StudioTab {...{
-              studios,
-              studiosSelected,
-              setStudiosSelected,
-              studioDialogOpen,
-              setStudioDialogOpen,
-              newStudioName,
-              setNewStudioName,
-              newStudioPicture,
-              setNewStudioPicture,
-              handleCreateStudio,
-              setTab
-            }} />
-          </TabsContent>
-          <TabsContent value="cast">
-            <CastTab {...{castList, castDialogOpen, setCastDialogOpen, newCastName, setNewCastName, newCastBirthday, setNewCastBirthday, newCastProfileUrl, setNewCastProfileUrl, handleCreateCast, selectedCast, setSelectedCast, castRole, setCastRole, customCastRole, setCustomCastRole, isCustomRole, setIsCustomRole, castRoles, setCastRoles, handleAddCastRole, handleRemoveCastRole, defaultRoles, tab, setTab}} />
-          </TabsContent>
-          <TabsContent value="platforms">
-            <PlatformsTab {...{
-              platformsList,
-              platformsSelected,
-              setPlatformsSelected,
-              platformDialogOpen,
-              setPlatformDialogOpen,
-              newPlatformName,
-              setNewPlatformName,
-              newPlatformImage,
-              setNewPlatformImage,
-              handleCreatePlatform,
-              setTab
-            }} />
-          </TabsContent>
-          <TabsContent value="visibility">
-            <VisibilityTab {...{visibility, setVisibility, setTab}} />
-          </TabsContent>
-          <TabsContent value="review">
-            <ReviewTab {...{
-              title,
-              description,
-              posterUrl,
-              bannerUrl,
-              publishers,
-              publishersSelected,
-              studios,
-              studiosSelected,
-              castRoles,
-              castList,
-              platformsList,
-              platformsSelected,
-              visibility,
-              loading,
-              error,
-              success,
-              genres,
-              genresSelected
-            }} />
-          </TabsContent>
-        </Tabs>
-      </form>
+    <div className="flex flex-col lg:flex-row gap-8 items-start w-full max-w-7xl mx-auto">
+      <div className="inline-block align-top mt-10 p-6 bg-background rounded shadow w-full lg:max-w-xl" style={{ minWidth: 350 }}>
+        <h1 className="text-2xl font-bold mb-4 text-foreground">Add Movie</h1>
+        <form onSubmit={handleSubmit}>
+          <Tabs value={tab} onValueChange={setTab} className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="basic">Basic Information</TabsTrigger>
+              <TabsTrigger value="publisher">Publisher</TabsTrigger>
+              <TabsTrigger value="studio">Studio</TabsTrigger>
+              <TabsTrigger value="cast">Cast</TabsTrigger>
+              <TabsTrigger value="platforms">Platforms</TabsTrigger>
+              <TabsTrigger value="visibility">Visibility</TabsTrigger>
+              <TabsTrigger value="review">Review</TabsTrigger>
+            </TabsList>
+            <TabsContent value="basic">
+              <BasicTab {...{title, setTitle, description, setDescription, posterUrl, setPosterUrl, bannerUrl, setBannerUrl, genres, genresSelected, setGenresSelected, setTab}} />
+            </TabsContent>
+            <TabsContent value="publisher">
+              <PublisherTab {...{
+                publishers,
+                publishersSelected,
+                setPublishersSelected,
+                publisherDialogOpen,
+                setPublisherDialogOpen,
+                newPublisherName,
+                setNewPublisherName,
+                newPublisherPicture,
+                setNewPublisherPicture,
+                handleCreatePublisher,
+                setTab
+              }} />
+            </TabsContent>
+            <TabsContent value="studio">
+              <StudioTab {...{
+                studios,
+                studiosSelected,
+                setStudiosSelected,
+                studioDialogOpen,
+                setStudioDialogOpen,
+                newStudioName,
+                setNewStudioName,
+                newStudioPicture,
+                setNewStudioPicture,
+                handleCreateStudio,
+                setTab
+              }} />
+            </TabsContent>
+            <TabsContent value="cast">
+              <CastTab {...{castList, castDialogOpen, setCastDialogOpen, newCastName, setNewCastName, newCastBirthday, setNewCastBirthday, newCastProfileUrl, setNewCastProfileUrl, handleCreateCast, selectedCast, setSelectedCast, castRole, setCastRole, customCastRole, setCustomCastRole, isCustomRole, setIsCustomRole, castRoles, setCastRoles, handleAddCastRole, handleRemoveCastRole, defaultRoles, tab, setTab}} />
+            </TabsContent>
+            <TabsContent value="platforms">
+              <PlatformsTab {...{
+                platformsList,
+                platformsSelected,
+                setPlatformsSelected,
+                platformDialogOpen,
+                setPlatformDialogOpen,
+                newPlatformName,
+                setNewPlatformName,
+                newPlatformImage,
+                setNewPlatformImage,
+                handleCreatePlatform,
+                setTab
+              }} />
+            </TabsContent>
+            <TabsContent value="visibility">
+              <VisibilityTab {...{visibility, setVisibility, setTab}} />
+            </TabsContent>
+            <TabsContent value="review">
+              <ReviewTab {...{
+                title,
+                description,
+                posterUrl,
+                bannerUrl,
+                publishers,
+                publishersSelected,
+                studios,
+                studiosSelected,
+                castRoles,
+                castList,
+                platformsList,
+                platformsSelected,
+                visibility,
+                loading,
+                error,
+                success,
+                genres,
+                genresSelected
+              }} />
+            </TabsContent>
+          </Tabs>
+        </form>
+      </div>
+      {/* Preview frame on the right for large screens */}
+      <div className="hidden lg:block flex-1 sticky top-10">
+        <div className="bg-card rounded-xl shadow border p-4">
+          <div className="mb-2 text-lg font-semibold text-center text-muted-foreground">Preview</div>
+          <MoviePreview
+            title={title}
+            description={description}
+            posterUrl={posterUrl}
+            bannerUrl={bannerUrl}
+            genres={genres.filter(g => genresSelected.includes(String(g.id)))}
+            publishers={publishers.filter(p => publishersSelected.includes(String(p.id)))}
+            studios={studios.filter(s => studiosSelected.includes(String(s.id)))}
+            platforms={platformsList.filter(p => platformsSelected.includes(String(p.id)))}
+            castRoles={castRoles}
+            castList={castList}
+            visibility={visibility}
+          />
+        </div>
+      </div>
     </div>
   );
 }

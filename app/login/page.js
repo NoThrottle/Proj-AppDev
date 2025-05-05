@@ -20,6 +20,11 @@ export default function AuthPage() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/movies";
 
+  // Show a user-friendly message for OAuthAccountNotLinked
+  const errorParam = searchParams.get("error");
+  const oauthAccountNotLinked = errorParam === "OAuthAccountNotLinked";
+  const callbackError = errorParam === "Callback";
+
   async function handleLogin(e) {
     e.preventDefault();
     setIsLoading(true);
@@ -111,6 +116,16 @@ export default function AuthPage() {
         </div>
         {errorMessage && (
           <Alert color="failure" onDismiss={() => setErrorMessage("")}>{errorMessage}</Alert>
+        )}
+        {oauthAccountNotLinked && (
+          <Alert color="failure" className="mb-4">
+            This email is already registered with a different sign-in method. Please use your original login method (e.g., Google or password) to sign in.
+          </Alert>
+        )}
+        {callbackError && (
+          <Alert color="failure" className="mb-4">
+            There was an error during authentication. Please try again or use a different sign-in method.
+          </Alert>
         )}
         {mode === "login" ? (
           <form onSubmit={handleLogin} className="mb-4">

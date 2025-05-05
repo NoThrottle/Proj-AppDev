@@ -5,9 +5,20 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
+// Wrap the PrismaAdapter to coerce id to number for getUser
+function FixedPrismaAdapter(prisma) {
+  const adapter = PrismaAdapter(prisma);
+  return {
+    ...adapter,
+    async getUser(id) {
+      return adapter.getUser(Number(id));
+    },
+  };
+}
+
 // Create NextAuth options
 export const authOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: FixedPrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -37,14 +48,14 @@ export const authOptions = {
     },
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
+        token.id = typeof user.id === "string" ? Number(user.id) : user.id;
         token.email = user.email;
         token.admin = user.admin;
       }
       return token;
     },
     async session({ session, token }) {
-      session.user.id = token.id;
+      session.user.id = typeof token.id === "string" ? Number(token.id) : token.id;
       session.user.email = token.email;
       session.user.admin = token.admin;
       return session;
