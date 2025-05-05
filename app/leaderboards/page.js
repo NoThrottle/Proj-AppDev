@@ -16,8 +16,16 @@ export default async function MoviesPage() {
   }
 
   const movies = await prisma.movie.findMany({
-    where: { userId: session.user.id },
-    orderBy: { createdAt: "desc" },
+    where: {
+      WatchlistEntry: {
+        some: {
+          userId: session.user.id,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
 
   const topMovies = movies
