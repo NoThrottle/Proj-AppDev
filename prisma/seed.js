@@ -22,6 +22,7 @@ async function main() {
       name:     "Alex",
       email:    "alex@gmail.com",
       password: password1,
+      admin:    true,
     },
   });
 
@@ -30,14 +31,20 @@ async function main() {
       name:     "Jane Smith",
       email:    "jane@example.com",
       password: password2,
+      admin:    false,
     },
   });
 
   // Create genres
-  const [actionGenre, comedyGenre, dramaGenre] = await Promise.all([
+  const [actionGenre, comedyGenre, dramaGenre, sciFiGenre, fantasyGenre, horrorGenre, romanceGenre, thrillerGenre] = await Promise.all([
     prisma.genre.create({ data: { name: "Action"  } }),
     prisma.genre.create({ data: { name: "Comedy"  } }),
     prisma.genre.create({ data: { name: "Drama"   } }),
+    prisma.genre.create({ data: { name: "Sci-Fi"  } }),
+    prisma.genre.create({ data: { name: "Fantasy" } }),
+    prisma.genre.create({ data: { name: "Horror"  } }),
+    prisma.genre.create({ data: { name: "Romance" } }),
+    prisma.genre.create({ data: { name: "Thriller"} }),
   ]);
 
   // Create watchlists for users

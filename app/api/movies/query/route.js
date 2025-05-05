@@ -49,6 +49,40 @@ export async function GET(req) {
     const ids = ratings.map((g) => g.movieId);
     movies = await prisma.movie.findMany({ where: { id: { in: ids } } });
     total = await prisma.ratingEntry.count();
+  } else if (type === "top_newest_highest_rated") {
+    // Top 5 newest movies within the last month, sorted by highest average rating
+    const since = new Date();
+    since.setDate(since.getDate() - 30);
+    // Get movies added in the last 30 days
+    const recentMovies = await prisma.movie.findMany({
+      where: { createdAt: { gte: since } },
+      include: {
+        ratingEntries: true,
+      },
+    });
+    // Calculate average rating for each movie
+    const moviesWithAvg = recentMovies.map((movie) => {
+      const ratings = movie.ratingEntries.map((r) => r.rating);
+      const avgRating = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
+      return { ...movie, avgRating };
+    });
+    // Sort by avgRating desc, then by createdAt desc
+    moviesWithAvg.sort((a, b) => b.avgRating - a.avgRating || b.createdAt - a.createdAt);
+    movies = moviesWithAvg.slice(0, limit);
+    total = movies.length;
+  } else if (type === "search") {
+    const query = searchParams.get("query") || "";
+    movies = await prisma.movie.findMany({
+      where: {
+        title: {
+          contains: query
+        },
+        visibility: "public",
+      },
+      orderBy: { title: "asc" },
+      take: limit,
+    });
+    total = movies.length;
   } else {
     return new Response(JSON.stringify({ error: "Invalid type" }), { status: 400 });
   }

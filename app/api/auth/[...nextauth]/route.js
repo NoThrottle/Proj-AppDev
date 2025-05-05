@@ -5,6 +5,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
+// Create NextAuth options
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -30,19 +31,26 @@ export const authOptions = {
   session: { strategy: "jwt" },
   pages: { signIn: "/login", error: "/login?error" },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Always redirect to home after login
+      return baseUrl;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.email = user.email;
+        token.admin = user.admin;
       }
       return token;
     },
     async session({ session, token }) {
       session.user.id = token.id;
       session.user.email = token.email;
+      session.user.admin = token.admin;
       return session;
     },
   },
+  debug: process.env.NODE_ENV === "development",
   secret: process.env.NEXTAUTH_SECRET,
 };
 
