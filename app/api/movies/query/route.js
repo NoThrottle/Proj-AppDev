@@ -7,6 +7,22 @@ export async function GET(req) {
   const page = parseInt(searchParams.get("page") || "1", 10);
   const skip = (page - 1) * limit;
 
+  if (searchParams.has("id")) {
+    // Fetch a single movie by ID with all relations
+    const id = parseInt(searchParams.get("id"), 10);
+    const movie = await prisma.movie.findUnique({
+      where: { id },
+      include: {
+        genres: true,
+        publishers: true,
+        studios: true,
+        platforms: true,
+        movieCasts: { include: { cast: true } },
+      },
+    });
+    return new Response(JSON.stringify({ movie }), { status: 200 });
+  }
+
   let movies = [];
   let total = 0;
 

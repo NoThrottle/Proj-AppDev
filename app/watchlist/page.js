@@ -17,6 +17,10 @@ export default async function WatchlistsPage() {
   // Server action to create a new watchlist
   async function createWatchlist(formData) {
     "use server";
+    if (!session || !session.user || !session.user.id) {
+      console.error("No valid user session for creating watchlist");
+      return;
+    }
     const name = formData.get("name");
     const image = formData.get("image");
     const description = formData.get("description");
