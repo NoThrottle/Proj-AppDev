@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
+import { useSession } from "next-auth/react";
 import ReviewForm from "./ReviewForm";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { FastAverageColor } from "fast-average-color";
@@ -11,6 +12,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, Pagi
 const RatingsChart = dynamic(() => import("@/components/ui/chart"), { ssr: false });
 
 export default function MoviePage() {
+  const { data: session } = useSession();
   const params = useParams();
   const id = parseInt(params.id, 10);
   const [movie, setMovie] = useState(null);
@@ -147,7 +149,9 @@ export default function MoviePage() {
           )}
         </div>
       )}
-      <div className="mt-4 text-sm text-muted-foreground">Visibility: {movie.visibility}</div>
+      {session?.user?.admin && (
+        <div className="mt-4 text-sm text-muted-foreground">Visibility: {movie.visibility}</div>
+      )}
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-2">Leave a Review</h2>
         <ReviewForm movieId={movie.id} />

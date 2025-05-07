@@ -5,7 +5,11 @@ import { Navbar } from "flowbite-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { Avatar } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import Cropper from "react-easy-crop";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export function Navigation() {
   const path = usePathname();
@@ -13,7 +17,32 @@ export function Navigation() {
   const [search, setSearch] = useState("");
   const [results, setResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
+  const [profileImage, setProfileImage] = useState("");
   const searchRef = useRef();
+
+  // Effect to update profile image when session changes or localStorage is updated
+  useEffect(() => {
+    // First try to get image from session
+    if (session?.user?.image) {
+      setProfileImage(`${session.user.image}?t=${Date.now()}`); // Add cache-busting
+    } else {
+      // If no session image, try localStorage as fallback
+      const cachedImage = typeof window !== 'undefined' ? localStorage.getItem('profileImage') : null;
+      if (cachedImage) {
+        setProfileImage(cachedImage);
+      }
+    }
+
+    // Listen for localStorage changes from other components
+    const handleStorageChange = (e) => {
+      if (e.key === 'profileImage' && e.newValue) {
+        setProfileImage(e.newValue);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [session]);
 
   async function handleSearch(e) {
     const value = e.target.value;
@@ -103,21 +132,49 @@ export function Navigation() {
             <Navbar.Link as={Link} href="/watchlist" active={path === "/watchlist"}>
               Watchlist
             </Navbar.Link>
-            {/* <Navbar.Link as={Link} href="/movies" active={path.startsWith("/movies")}> 
-              Movies
-            </Navbar.Link> */}
             {!session ? (
               <Navbar.Link as={Link} href="/login" active={path === "/login"}>
                 Login
               </Navbar.Link>
             ) : (
-              <button
-                onClick={() => signOut({ callbackUrl: "/" })}
-                className="text-red-500 font-medium px-2 hover:underline transition-all duration-200"
-                style={{ minWidth: 80, padding: '0 16px', fontSize: '1rem', borderRadius: 6, height: '40px', whiteSpace: 'nowrap' }}
-              >
-                Logout ({session.user.name || session.user.email})
-              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="focus:outline-none">
+                    {profileImage ? (
+                      <span className="w-9 h-9 rounded-full overflow-hidden border bg-muted inline-block">
+                        <Image
+                          src={profileImage}
+                          alt={session.user.name || session.user.email || "User"}
+                          width={36}
+                          height={36}
+                          className="object-cover w-9 h-9 rounded-full"
+                        />
+                      </span>
+                    ) : (
+                      <Avatar
+                        src={undefined}
+                        alt={session.user.name || session.user.email || "User"}
+                        fallback={
+                          session.user.name
+                            ? session.user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+                            : session.user.email
+                            ? session.user.email[0].toUpperCase()
+                            : "U"
+                        }
+                        className="w-9 h-9 border bg-muted text-white"
+                      />
+                    )}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link href="/account">Account Settings</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })} className="text-red-500">
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         </div>
