@@ -16,6 +16,7 @@ export default function WatchlistEntriesClient({ entries }) {
   const [selected, setSelected] = useState([]);
   const [sortBy, setSortBy] = useState("index");
   const [items, setItems] = useState(entries.map(e => e));
+  const [deleting, setDeleting] = useState([]);
 
   useEffect(() => {
     setItems(entries.map(e => e));
@@ -36,13 +37,16 @@ export default function WatchlistEntriesClient({ entries }) {
     setSelected((prev) => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
 
-  const handleDeleteSelected = () => {
-    selected.forEach(id => {
-      // You may want to call a delete handler here
-      // For now, just log
-      // onDelete(id); // if you have an onDelete prop
-    });
+  const handleDeleteSelected = async () => {
+    for (const id of selected) {
+      setDeleting(prev => [...prev, id]);
+      await fetch(`/api/watchlist/${id}/delete`, { method: 'DELETE' });
+    }
     setSelected([]);
+    setDeleting([]);
+    // Optionally: refresh entries from server here if needed
+    // For now, remove deleted items from UI
+    setItems(items => items.filter(e => !selected.includes(e.id)));
   };
 
   const handleDragEnd = ({ active, over }) => {
@@ -102,21 +106,34 @@ export default function WatchlistEntriesClient({ entries }) {
         <div className="p-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {sorted.map(entry => (
-              <WatchlistCard
+              <div
                 key={entry.id}
-                image={entry.movie.posterUrl}
-                tintColor={entry.movie.tintColor}
-                title={entry.movie.title}
-                imageAlt={entry.movie.title}
-                placeholderIcon="🎬"
+                className={`relative transition-all duration-200 rounded-lg shadow-sm border border-gray-500 overflow-hidden w-full max-w-xs min-w-[16rem] min-h-[340px] max-h-[340px] ${editMode ? 'cursor-pointer' : ''} ${editMode && selected.includes(entry.id) ? 'ring-2 ring-blue-500 bg-blue-100/20 dark:bg-blue-900/20 border-blue-500' : ''} ${editMode && !selected.includes(entry.id) ? 'hover:ring-2 hover:ring-blue-400/80 hover:bg-blue-50/10 dark:hover:bg-blue-900/10' : ''}`}
+                onClick={editMode ? () => toggleSelect(entry.id) : undefined}
               >
-                <p className="text-sm text-gray-500">
-                  {entry.movie.genres && entry.movie.genres.length > 0
-                    ? entry.movie.genres.map(g => g.name).join(", ")
-                    : null}
-                </p>
-                <p className="text-xs text-gray-400">Added: {new Date(entry.dateAdded).toLocaleDateString()}</p>
-              </WatchlistCard>
+                {editMode && (
+                  <Checkbox
+                    checked={selected.includes(entry.id)}
+                    onCheckedChange={() => toggleSelect(entry.id)}
+                    className="absolute top-2 left-2 z-10 w-5 h-5 bg-white"
+                  />
+                )}
+                <WatchlistCard
+                  image={entry.movie.posterUrl}
+                  tintColor={entry.movie.tintColor}
+                  title={entry.movie.title}
+                  imageAlt={entry.movie.title}
+                  placeholderIcon="🎬"
+                  clickable={false}
+                >
+                  <p className="text-sm text-gray-500">
+                    {entry.movie.genres && entry.movie.genres.length > 0
+                      ? entry.movie.genres.map(g => g.name).join(", ")
+                      : null}
+                  </p>
+                  <p className="text-xs text-gray-400">Added: {new Date(entry.dateAdded).toLocaleDateString()}</p>
+                </WatchlistCard>
+              </div>
             ))}
           </div>
         </div>
@@ -127,15 +144,24 @@ export default function WatchlistEntriesClient({ entries }) {
 
 function SortableEntryCard({ entry, index, editMode, selected, toggleSelect }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: entry.id });
-  const style = { transform: CSS.Transform.toString(transform), transition };
+  const style = { transform: CSS.Transform.toString(transform), transition, cursor: editMode ? "pointer" : undefined };
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="flex items-center justify-between p-4 bg-white/10 dark:bg-gray-800/80 hover:bg-white/20 dark:hover:bg-gray-700/80 transition rounded-lg shadow ring-1 ring-black/10 dark:ring-white/10 mb-2 backdrop-blur min-h-[64px] relative cursor-pointer">
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      className="flex items-center justify-between p-4 bg-white/10 dark:bg-gray-800/80 hover:bg-white/20 dark:hover:bg-gray-700/80 transition rounded-lg shadow ring-1 ring-black/10 dark:ring-white/10 mb-2 backdrop-blur min-h-[64px] relative"
+      onClick={editMode ? () => toggleSelect(entry.id) : undefined}
+    >
       {editMode && (
-        <Checkbox
-          checked={selected.includes(entry.id)}
-          onCheckedChange={() => toggleSelect(entry.id)}
-          className="mr-3 w-5 h-5 bg-white"
-        />
+        <>
+          <span {...listeners} className="mr-2 cursor-grab select-none text-xl" title="Drag to reorder">⠿</span>
+          <Checkbox
+            checked={selected.includes(entry.id)}
+            onCheckedChange={() => toggleSelect(entry.id)}
+            className="mr-3 w-5 h-5 bg-white"
+          />
+        </>
       )}
       <div className="flex items-center gap-4 flex-1 min-w-0 h-12">
         {entry.movie.posterUrl ? (
@@ -155,7 +181,10 @@ function SortableEntryCard({ entry, index, editMode, selected, toggleSelect }) {
 
 function EntryCard({ entry, index, editMode, selected, toggleSelect }) {
   return (
-    <div className="flex items-center justify-between p-4 bg-white/10 dark:bg-gray-800/80 hover:bg-white/20 dark:hover:bg-gray-700/80 transition rounded-lg shadow ring-1 ring-black/10 dark:ring-white/10 mb-2 backdrop-blur min-h-[64px] relative cursor-pointer">
+    <div
+      className={`flex items-center justify-between p-4 bg-white/10 dark:bg-gray-800/80 transition rounded-lg shadow ring-1 ring-black/10 dark:ring-white/10 mb-2 backdrop-blur min-h-[64px] relative border border-gray-500 overflow-hidden ${editMode ? 'cursor-pointer' : ''} ${editMode && selected.includes(entry.id) ? 'ring-2 ring-blue-500 bg-blue-100/20 dark:bg-blue-900/20 border-blue-500' : ''} ${editMode && !selected.includes(entry.id) ? 'hover:ring-2 hover:ring-blue-400/80 hover:bg-blue-50/10 dark:hover:bg-blue-900/10' : ''}`}
+      onClick={editMode ? () => toggleSelect(entry.id) : undefined}
+    >
       {editMode && (
         <Checkbox
           checked={selected.includes(entry.id)}
