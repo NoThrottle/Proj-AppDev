@@ -1,4 +1,6 @@
 import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
@@ -99,6 +101,19 @@ export async function GET(req) {
       take: limit,
     });
     total = movies.length;
+  } else if (type === "watchlists") {
+    // Get the current user's watchlists
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return new Response(JSON.stringify({ watchlists: [] }), { status: 200 });
+    }
+    
+    const watchlists = await prisma.watchlist.findMany({
+      where: { userId: session.user.id },
+      orderBy: { name: "asc" },
+    });
+    
+    return new Response(JSON.stringify({ watchlists }), { status: 200 });
   } else {
     return new Response(JSON.stringify({ error: "Invalid type" }), { status: 400 });
   }
