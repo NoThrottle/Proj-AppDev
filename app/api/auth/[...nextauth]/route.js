@@ -46,11 +46,20 @@ export const authOptions = {
       // Always redirect to home after login
       return baseUrl;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = typeof user.id === "string" ? Number(user.id) : user.id;
         token.email = user.email;
         token.admin = user.admin;
+        token.image = user.image; // Ensure image is included in token
+        // Add provider information to identify auth method
+        if (account) {
+          token.provider = account.provider;
+        } else if (user.password) {
+          token.provider = "credentials";
+        } else if (user.email?.includes("@gmail.com")) {
+          token.provider = "google";
+        }
       }
       return token;
     },
@@ -58,6 +67,8 @@ export const authOptions = {
       session.user.id = typeof token.id === "string" ? Number(token.id) : token.id;
       session.user.email = token.email;
       session.user.admin = token.admin;
+      session.user.image = token.image; // Ensure image is included in session
+      session.user.provider = token.provider; // Add provider to session
       return session;
     },
   },
