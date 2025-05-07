@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Card, Button, TextInput } from "flowbite-react";
 import WatchlistCard from "../../components/ui/WatchlistCard";
@@ -16,6 +16,10 @@ export default function WatchlistEntriesClient({ entries }) {
   const [selected, setSelected] = useState([]);
   const [sortBy, setSortBy] = useState("index");
   const [items, setItems] = useState(entries.map(e => e));
+
+  useEffect(() => {
+    setItems(entries.map(e => e));
+  }, [entries]);
 
   const filtered = items.filter(entry =>
     entry.movie.title.toLowerCase().includes(search.toLowerCase())
