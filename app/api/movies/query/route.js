@@ -90,13 +90,17 @@ export async function GET(req) {
     total = movies.length;
   } else if (type === "search") {
     const query = searchParams.get("query") || "";
+    const visibility = searchParams.get("visibility") || "public";
+    let where = {
+      title: {
+        contains: query
+      }
+    };
+    if (visibility !== "all") {
+      where.visibility = visibility;
+    }
     movies = await prisma.movie.findMany({
-      where: {
-        title: {
-          contains: query
-        },
-        visibility: "public",
-      },
+      where,
       orderBy: { title: "asc" },
       take: limit,
     });

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import MovieDialog from "@/components/ui/MovieDialog";
 import Link from "next/link";
+import MovieList from "./movie/MovieList";
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
@@ -14,6 +15,10 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const handleAddMovie = () => {
+    router.push("/admin/movie");
+  };
 
   // Only allow admin users
   if (status === "loading") return <div>Loading...</div>;
@@ -48,23 +53,14 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto mt-10 p-6 bg-background rounded shadow dark:bg-gray-900">
-      <h1 className="text-2xl font-bold mb-4 text-foreground">Admin: Add Movie</h1>
-      <Link
-        href="/admin/movie"
-        className="mb-4 inline-block px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
-      >
-        Add Movie
-      </Link>
-      <MovieDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        onSubmit={handleSubmit}
-        loading={loading}
-        error={error}
-        success={success}
-        mode="add"
-      />
+    <div className="max-w-5xl mx-auto mt-10 p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold text-foreground">Admin: Movies</h1>
+        <Button onClick={handleAddMovie}>
+          Add Movie
+        </Button>
+      </div>
+      <MovieList />
     </div>
   );
 }
