@@ -8,6 +8,9 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from ".
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem } from "../../components/ui/context-menu";
+import { useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
 
 export default function WatchlistEntriesClient({ entries }) {
   const [view, setView] = useState("cards");
@@ -17,6 +20,7 @@ export default function WatchlistEntriesClient({ entries }) {
   const [sortBy, setSortBy] = useState("index");
   const [items, setItems] = useState(entries.map(e => e));
   const [deleting, setDeleting] = useState([]);
+  const router = useRouter();
 
   useEffect(() => {
     setItems(entries.map(e => e));
@@ -56,6 +60,25 @@ export default function WatchlistEntriesClient({ entries }) {
     const newItems = arrayMove(items, oldIndex, newIndex);
     setItems(newItems);
     // TODO: Persist new order to backend
+  };
+
+  // Context menu handlers
+  const handleVisitMovie = (entry) => {
+    router.push(`/movie/${entry.movie.id}`);
+  };
+  const handleMarkWatched = async (entry) => {
+    await fetch(`/api/watchlist/${entry.id}/edit`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ dateWatched: new Date().toISOString() })
+    });
+    setItems(items => items.map(e => e.id === entry.id ? { ...e, dateWatched: new Date().toISOString() } : e));
+  };
+  const handleDelete = async (entry) => {
+    setDeleting(prev => [...prev, entry.id]);
+    await fetch(`/api/watchlist/${entry.id}/delete`, { method: 'DELETE' });
+    setItems(items => items.filter(e => e.id !== entry.id));
+    setDeleting(prev => prev.filter(id => id !== entry.id));
   };
 
   return (
@@ -106,34 +129,45 @@ export default function WatchlistEntriesClient({ entries }) {
         <div className="p-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {sorted.map(entry => (
-              <div
-                key={entry.id}
-                className={`relative transition-all duration-200 rounded-lg shadow-sm border border-gray-500 overflow-hidden w-full max-w-xs min-w-[16rem] min-h-[340px] max-h-[340px] ${editMode ? 'cursor-pointer' : ''} ${editMode && selected.includes(entry.id) ? 'ring-2 ring-blue-500 bg-blue-100/20 dark:bg-blue-900/20 border-blue-500' : ''} ${editMode && !selected.includes(entry.id) ? 'hover:ring-2 hover:ring-blue-400/80 hover:bg-blue-50/10 dark:hover:bg-blue-900/10' : ''}`}
-                onClick={editMode ? () => toggleSelect(entry.id) : undefined}
-              >
-                {editMode && (
-                  <Checkbox
-                    checked={selected.includes(entry.id)}
-                    onCheckedChange={() => toggleSelect(entry.id)}
-                    className="absolute top-2 left-2 z-10 w-5 h-5 bg-white"
-                  />
-                )}
-                <WatchlistCard
-                  image={entry.movie.posterUrl}
-                  tintColor={entry.movie.tintColor}
-                  title={entry.movie.title}
-                  imageAlt={entry.movie.title}
-                  placeholderIcon="🎬"
-                  clickable={false}
-                >
-                  <p className="text-sm text-gray-500">
-                    {entry.movie.genres && entry.movie.genres.length > 0
-                      ? entry.movie.genres.map(g => g.name).join(", ")
-                      : null}
-                  </p>
-                  <p className="text-xs text-gray-400">Added: {new Date(entry.dateAdded).toLocaleDateString()}</p>
-                </WatchlistCard>
-              </div>
+              <ContextMenu key={entry.id}>
+                <ContextMenuTrigger asChild>
+                  <div
+                    className={`relative transition-all duration-200 rounded-lg shadow-sm border border-gray-500 overflow-hidden w-full max-w-xs min-w-[16rem] min-h-[340px] max-h-[340px] ${editMode ? 'cursor-pointer' : ''} ${editMode && selected.includes(entry.id) ? 'ring-2 ring-blue-500 bg-blue-100/20 dark:bg-blue-900/20 border-blue-500' : ''} ${editMode && !selected.includes(entry.id) ? 'hover:ring-2 hover:ring-blue-400/80 hover:bg-blue-50/10 dark:hover:bg-blue-900/10' : ''}`}
+                    onClick={editMode ? () => toggleSelect(entry.id) : undefined}
+                  >
+                    {entry.dateWatched && (
+                      <Badge className="absolute top-2 right-2 z-10" variant="success">Watched</Badge>
+                    )}
+                    {editMode && (
+                      <Checkbox
+                        checked={selected.includes(entry.id)}
+                        onCheckedChange={() => toggleSelect(entry.id)}
+                        className="absolute top-2 left-2 z-10 w-5 h-5 bg-white"
+                      />
+                    )}
+                    <WatchlistCard
+                      image={entry.movie.posterUrl}
+                      tintColor={entry.movie.tintColor}
+                      title={entry.movie.title}
+                      imageAlt={entry.movie.title}
+                      placeholderIcon="🎬"
+                      clickable={false}
+                    >
+                      <p className="text-sm text-gray-500">
+                        {entry.movie.genres && entry.movie.genres.length > 0
+                          ? entry.movie.genres.map(g => g.name).join(", ")
+                          : null}
+                      </p>
+                      <p className="text-xs text-gray-400">Added: {new Date(entry.dateAdded).toLocaleDateString()}</p>
+                    </WatchlistCard>
+                  </div>
+                </ContextMenuTrigger>
+                <ContextMenuContent>
+                  <ContextMenuItem onClick={() => handleVisitMovie(entry)}>Visit movie page</ContextMenuItem>
+                  <ContextMenuItem onClick={() => handleMarkWatched(entry)} disabled={!!entry.dateWatched}>Mark as watched</ContextMenuItem>
+                  <ContextMenuItem onClick={() => handleDelete(entry)} className="text-red-600">Delete</ContextMenuItem>
+                </ContextMenuContent>
+              </ContextMenu>
             ))}
           </div>
         </div>

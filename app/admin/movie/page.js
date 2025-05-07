@@ -328,7 +328,7 @@ export default function AddMoviePage() {
       </div>
       {/* Preview frame on the right for large screens */}
       <div className="hidden lg:block flex-1 sticky top-10">
-        <div className="bg-card rounded-xl shadow border p-4 mt-8">
+        <div className="bg-card rounded-xl shadow border p-4 mt-16">
           <div className="mb-6 text-lg font-semibold text-center text-muted-foreground">Preview</div>
           <MoviePreview
             title={title}

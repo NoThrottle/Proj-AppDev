@@ -220,6 +220,11 @@ export function Navigation() {
                 className="px-2">
                 Watchlist
               </Navbar.Link>
+              {session?.user?.admin && (
+                <Navbar.Link as={Link} href="/admin" active={path === "/admin"} className="px-2">
+                  Admin
+                </Navbar.Link>
+              )}
             </div>
 
             {/* Centered Search Bar */}
